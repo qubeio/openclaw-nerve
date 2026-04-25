@@ -8,6 +8,9 @@ import { config } from './config.js';
 /** Regular expression to match IPv4 and IPv6 loopback addresses */
 export const LOOPBACK_RE = /^(127\.\d+\.\d+\.\d+|::1|::ffff:127\.\d+\.\d+\.\d+)$/;
 
+/** Regular expression to match RFC 1918 private network addresses (local Docker bridges etc.) */
+const PRIVATE_NET_RE = /^(10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+|192\.168\.\d+\.\d+)$/;
+
 /**
  * Resolve the real client IP, accounting for local reverse proxies (X-Forwarded-For).
  * Only trusts forwarded headers if the direct connection is from a loopback address.
@@ -18,8 +21,9 @@ export function getRealClientIp(req: {
 }): string {
   const directIp = req.socket.remoteAddress || '';
   const isDirectLoopback = LOOPBACK_RE.test(directIp);
-  
-  if (isDirectLoopback) {
+  const isDirectPrivate = PRIVATE_NET_RE.test(directIp);
+
+  if (isDirectLoopback || isDirectPrivate) {
     const forwarded = req.headers['x-forwarded-for'];
     const realIp = req.headers['x-real-ip'];
     const headersIp = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(',')[0].trim()
@@ -47,7 +51,7 @@ export function isRequestTrusted(req: {
   headers: Record<string, string | string[] | undefined>;
 }): boolean {
   const clientIp = getRealClientIp(req);
-  return config.auth || LOOPBACK_RE.test(clientIp);
+  return config.auth || LOOPBACK_RE.test(clientIp) || PRIVATE_NET_RE.test(clientIp);
 }
 
 /**
