@@ -353,6 +353,7 @@ const spawnSubagentSchema = z.object({
   model: z.string().max(200).optional(),
   thinking: z.string().max(20).optional(),
   cleanup: z.enum(['keep', 'delete']).default('keep'),
+  silent: z.boolean().optional(),
 });
 
 app.post('/api/sessions/spawn-subagent', rateLimitGeneral, async (c) => {
@@ -379,6 +380,7 @@ app.post('/api/sessions/spawn-subagent', rateLimitGeneral, async (c) => {
       model: parsed.data.model,
       thinking: parsed.data.thinking,
       cleanup: parsed.data.cleanup,
+      silent: parsed.data.silent,
     });
 
     return c.json({

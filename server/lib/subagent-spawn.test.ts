@@ -373,6 +373,71 @@ describe('subagent-spawn helper', () => {
     });
   });
 
+  it('silent: true skips the completion monitor (activeMonitors stays empty)', async () => {
+    const calls: Array<{ method: string; params: Record<string, unknown> }> = [];
+
+    vi.spyOn(gatewayRpc, 'gatewayRpcCall').mockImplementation(async (method, params) => {
+      calls.push({ method, params });
+      if (method === 'sessions.create') return { key: 'agent:reviewer:subagent:silent-1' };
+      if (method === 'sessions.send' && params.key === 'agent:reviewer:subagent:silent-1') return { runId: 'run-s1' };
+      throw new Error(`unexpected ${method}`);
+    });
+
+    const result = await spawnSubagent({
+      parentSessionKey: 'agent:reviewer:main',
+      task: 'silent task',
+      silent: true,
+    });
+
+    expect(result.mode).toBe('direct');
+    expect(result.sessionKey).toBe('agent:reviewer:subagent:silent-1');
+
+    // Advance timers well past the monitor's initial delay—no poll should fire.
+    await vi.advanceTimersByTimeAsync(30_000);
+
+    const parentReports = calls.filter(
+      (c) => c.method === 'sessions.send' && c.params.key === 'agent:reviewer:main',
+    );
+    expect(parentReports).toHaveLength(0);
+
+    const listPolls = calls.filter((c) => c.method === 'sessions.list');
+    expect(listPolls).toHaveLength(0);
+  });
+
+  it('silent: false (or omitted) still registers the monitor', async () => {
+    const calls: Array<{ method: string; params: Record<string, unknown> }> = [];
+
+    vi.spyOn(gatewayRpc, 'gatewayRpcCall').mockImplementation(async (method, params) => {
+      calls.push({ method, params });
+      if (method === 'sessions.create') return { key: 'agent:reviewer:subagent:noisy-1' };
+      if (method === 'sessions.send' && params.key === 'agent:reviewer:subagent:noisy-1') return { runId: 'run-n1' };
+      if (method === 'sessions.list') {
+        return { sessions: [{ sessionKey: 'agent:reviewer:subagent:noisy-1', status: 'done', agentState: 'idle', busy: false, processing: false, runId: 'run-n1' }] };
+      }
+      if (method === 'sessions.get') {
+        return { messages: [{ role: 'user', content: 'silent task', runId: 'run-n1', timestamp: 100 }, { role: 'assistant', content: 'done', runId: 'run-n1', timestamp: 101 }] };
+      }
+      if (method === 'sessions.send' && params.key === 'agent:reviewer:main') return { ok: true };
+      throw new Error(`unexpected ${method}`);
+    });
+
+    await spawnSubagent({
+      parentSessionKey: 'agent:reviewer:main',
+      task: 'silent task',
+      silent: false,
+    });
+
+    await vi.advanceTimersByTimeAsync(20_000);
+
+    const listPolls = calls.filter((c) => c.method === 'sessions.list');
+    expect(listPolls.length).toBeGreaterThan(0);
+
+    const parentReport = calls.find(
+      (c) => c.method === 'sessions.send' && c.params.key === 'agent:reviewer:main',
+    );
+    expect(parentReport).toBeTruthy();
+  });
+
   it('does not hide generic direct-launch errors behind marker fallback', async () => {
     vi.spyOn(gatewayRpc, 'gatewayRpcCall').mockImplementation(async (method) => {
       if (method === 'sessions.create') throw new Error('parent root not found');

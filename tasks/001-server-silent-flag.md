@@ -1,6 +1,6 @@
 # 001: Server — add `silent` flag to spawn-subagent flow
 
-**Status:** Backlog
+**Status:** Done
 **Created:** 2026-04-25
 **Updated:** 2026-04-25
 
@@ -13,18 +13,18 @@ that runs without ever injecting a "completion report" back into the root.
 
 ## Acceptance Criteria
 
-- [ ] `SpawnSubagentParams` in `server/lib/subagent-spawn.ts` has an optional
+- [x] `SpawnSubagentParams` in `server/lib/subagent-spawn.ts` has an optional
   `silent?: boolean` field.
-- [ ] `launchDirect()` skips `startCompletionMonitor()` when `silent === true`.
-- [ ] The marker-fallback path either supports `silent` or fails fast with a
+- [x] `launchDirect()` skips `startCompletionMonitor()` when `silent === true`.
+- [x] The marker-fallback path either supports `silent` or fails fast with a
   clear error if the caller asks for `silent` while only the marker path is
   available. (Direct path works on macOS, so this is not blocking.)
-- [ ] `spawnSubagentSchema` (zod) in `server/routes/sessions.ts` accepts
+- [x] `spawnSubagentSchema` (zod) in `server/routes/sessions.ts` accepts
   optional `silent: boolean`.
-- [ ] The route handler passes `silent` through to `spawnSubagent()`.
-- [ ] Existing behaviour (calls without `silent`) is byte-identical: monitor
+- [x] The route handler passes `silent` through to `spawnSubagent()`.
+- [x] Existing behaviour (calls without `silent`) is byte-identical: monitor
   runs, parent gets a report. No regression for current Subagent flow.
-- [ ] Unit test in `server/lib/subagent-spawn.test.ts` confirms:
+- [x] Unit test in `server/lib/subagent-spawn.test.ts` confirms:
   - `silent: true` → `activeMonitors` does NOT gain the new child key
   - `silent: false` (or omitted) → monitor registered as before
 
@@ -65,10 +65,11 @@ curl -s -XPOST http://localhost:3080/api/sessions/spawn-subagent \
 
 ## Subtasks
 
-- [ ] Implement `silent` in `subagent-spawn.ts`
-- [ ] Update zod schema + route handler in `sessions.ts`
-- [ ] Add/extend unit tests in `subagent-spawn.test.ts`
+- [x] Implement `silent` in `subagent-spawn.ts`
+- [x] Update zod schema + route handler in `sessions.ts`
+- [x] Add/extend unit tests in `subagent-spawn.test.ts`
 
 ## Log
 
 - 2026-04-25: Created. Branched off `feature/standalone-session`.
+- 2026-04-25: Implemented. Decision: `silent + cleanup='delete'` forces `keep` (no monitor = no deletion trigger). Marker-fallback path passes `silent` through transparently — it never starts a monitor regardless, so behaviour is correct without extra code.

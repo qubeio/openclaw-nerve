@@ -19,6 +19,13 @@ export interface SpawnSubagentParams {
   model?: string;
   thinking?: string;
   cleanup?: SubagentCleanupMode;
+  /**
+   * When true, no completion monitor is started and no report is injected back
+   * into the parent root. Suitable for "standalone session" mode.
+   * Note: `cleanup: 'delete'` is ignored when `silent` is true — the child is
+   * always kept (no monitor means no one to trigger deletion).
+   */
+  silent?: boolean;
 }
 
 export interface SpawnSubagentResult {
@@ -436,14 +443,18 @@ async function launchDirect(params: SpawnSubagentParams): Promise<SpawnSubagentR
     idempotencyKey: `subagent-spawn:${Date.now()}:${randomUUID().slice(0, 8)}`,
   }) as { runId?: string };
 
-  startCompletionMonitor({
-    parentSessionKey: params.parentSessionKey,
-    childSessionKey: sessionKey,
-    label: params.label,
-    cleanup: params.cleanup ?? 'keep',
-    runId: sendResponse.runId,
-    launchTimestamp,
-  });
+  if (!params.silent) {
+    startCompletionMonitor({
+      parentSessionKey: params.parentSessionKey,
+      childSessionKey: sessionKey,
+      label: params.label,
+      // silent + cleanup='delete' is unsupported: no monitor means no deletion trigger.
+      // Force 'keep' so we don't silently lose the session.
+      cleanup: params.cleanup ?? 'keep',
+      runId: sendResponse.runId,
+      launchTimestamp,
+    });
+  }
 
   return {
     sessionKey,
