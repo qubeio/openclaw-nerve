@@ -1,6 +1,6 @@
 # 003: New SpawnStandaloneDialog component
 
-**Status:** Backlog
+**Status:** Done
 **Created:** 2026-04-25
 **Updated:** 2026-04-25
 
@@ -14,18 +14,18 @@ Depends on **task 002**.
 
 ## Acceptance Criteria
 
-- [ ] New file: `src/features/sessions/SpawnStandaloneDialog.tsx`.
-- [ ] Component accepts: `open`, `onOpenChange`, `onSpawn` (same signature as
+- [x] New file: `src/features/sessions/SpawnStandaloneDialog.tsx`.
+- [x] Component accepts: `open`, `onOpenChange`, `onSpawn` (same signature as
   existing `SpawnAgentDialog`).
-- [ ] Form fields:
+- [x] Form fields:
   - **Task** (textarea, required) — first message to send
   - **Label** (text, optional) — display name in panel
   - **Parent root** (select, defaults to current root) — only relevant if
     multiple top-level agents exist; hidden if only one
   - Model + Thinking inherit silently (no UI for these in the bare dialog)
-- [ ] Submit calls `onSpawn({ kind: 'standalone', task, label, parentSessionKey })`.
-- [ ] Cancel/Escape closes the dialog and resets form state.
-- [ ] Visually consistent with `SpawnAgentDialog` (same Dialog primitives,
+- [x] Submit calls `onSpawn({ kind: 'standalone', task, label, parentSessionKey })`.
+- [x] Cancel/Escape closes the dialog and resets form state.
+- [x] Visually consistent with `SpawnAgentDialog` (same Dialog primitives,
   same input components — `InlineSelect` etc.). Reuse existing UI components.
 
 ## Technical Notes
@@ -49,11 +49,12 @@ session sees.
 
 ## Subtasks
 
-- [ ] Scaffold component with imports
-- [ ] Form state + validation
-- [ ] Wire submit → onSpawn
-- [ ] Style/reuse existing UI primitives
+- [x] Scaffold component with imports
+- [x] Form state + validation
+- [x] Wire submit → onSpawn
+- [x] Style/reuse existing UI primitives
 
 ## Log
 
 - 2026-04-25: Created.
+- 2026-04-25: Implemented. Used plain `<select>` rather than `InlineSelect` for the parent picker (InlineSelect is designed for toolbar use, not a form field). Matches Dialog/Button primitives from SpawnAgentDialog; identical visual shell.
