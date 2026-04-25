@@ -16,8 +16,9 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Plus, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Layers, Plus, RefreshCw } from 'lucide-react';
 import { SpawnAgentDialog } from './SpawnAgentDialog';
+import { SpawnStandaloneDialog } from './SpawnStandaloneDialog';
 
 interface SessionListProps {
   sessions: Session[];
@@ -56,6 +57,7 @@ export function SessionList({ sessions, currentSession, busyState, agentStatus, 
   const [deleteTarget, setDeleteTarget] = useState<{ key: string; label: string; descendantCount: number; isRootAgent: boolean } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [spawnOpen, setSpawnOpen] = useState(false);
+  const [standaloneOpen, setStandaloneOpen] = useState(false);
   const [renamingKey, setRenamingKey] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const renameInputRef = useRef<HTMLInputElement>(null);
@@ -154,6 +156,17 @@ export function SessionList({ sessions, currentSession, busyState, agentStatus, 
           AGENTS
         </span>
         <div className="ml-auto flex items-center gap-2">
+          {onSpawn && (
+            <button
+              type="button"
+              onClick={() => setStandaloneOpen(true)}
+              aria-label="New standalone session"
+              title="New standalone session"
+              className="shell-icon-button size-10 px-0"
+            >
+              <Layers size={16} aria-hidden="true" />
+            </button>
+          )}
           {onSpawn && (
             <button
               type="button"
@@ -276,11 +289,18 @@ export function SessionList({ sessions, currentSession, busyState, agentStatus, 
         </DialogContent>
       </Dialog>
 
-      {/* Session creation dialog */}
+      {/* Session creation dialogs */}
       {onSpawn && (
         <SpawnAgentDialog
           open={spawnOpen}
           onOpenChange={setSpawnOpen}
+          onSpawn={onSpawn}
+        />
+      )}
+      {onSpawn && (
+        <SpawnStandaloneDialog
+          open={standaloneOpen}
+          onOpenChange={setStandaloneOpen}
           onSpawn={onSpawn}
         />
       )}

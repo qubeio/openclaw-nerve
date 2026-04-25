@@ -1,6 +1,6 @@
 # 004: Add second `+` button to AGENTS panel
 
-**Status:** Backlog
+**Status:** Done
 **Created:** 2026-04-25
 **Updated:** 2026-04-25
 
@@ -14,15 +14,15 @@ Depends on **task 003**.
 
 ## Acceptance Criteria
 
-- [ ] In `src/features/sessions/SessionList.tsx`, add a new icon button next
+- [x] In `src/features/sessions/SessionList.tsx`, add a new icon button next
   to the existing "Create session" `+` button.
-- [ ] Icon: `Layers` (or similar) from lucide — visually distinct from `Plus`.
-- [ ] Tooltip / aria-label: "New standalone session"
-- [ ] Clicking opens `SpawnStandaloneDialog` (separate state from
+- [x] Icon: `Layers` (or similar) from lucide — visually distinct from `Plus`.
+- [x] Tooltip / aria-label: "New standalone session"
+- [x] Clicking opens `SpawnStandaloneDialog` (separate state from
   `spawnOpen`).
-- [ ] When dialog submits successfully, dialog closes and panel refreshes
+- [x] When dialog submits successfully, dialog closes and panel refreshes
   (same pattern as existing flow).
-- [ ] Existing `+` button behaviour is unchanged.
+- [x] Existing `+` button behaviour is unchanged.
 
 ## Technical Notes
 
@@ -48,11 +48,12 @@ Manual:
 
 ## Subtasks
 
-- [ ] Add new state hook
-- [ ] Add new button in header JSX
-- [ ] Render new dialog
-- [ ] Verify no regression in existing button
+- [x] Add new state hook
+- [x] Add new button in header JSX
+- [x] Render new dialog
+- [x] Verify no regression in existing button
 
 ## Log
 
 - 2026-04-25: Created.
+- 2026-04-25: Implemented. Layers button placed before Plus (left-most = fast path per task spec). Both dialogs guarded by `onSpawn` as before. No changes to Plus button or SpawnAgentDialog.
