@@ -1,6 +1,6 @@
 # 002: Client — extend SpawnSessionOpts with `standalone` kind
 
-**Status:** Backlog
+**Status:** Done
 **Created:** 2026-04-25
 **Updated:** 2026-04-25
 
@@ -14,14 +14,14 @@ Depends on **task 001** (server must accept `silent`).
 
 ## Acceptance Criteria
 
-- [ ] `SpawnSessionOpts.kind` in `src/contexts/SessionContext.tsx` is now
+- [x] `SpawnSessionOpts.kind` in `src/contexts/SessionContext.tsx` is now
   `'root' | 'subagent' | 'standalone'`.
-- [ ] `spawnSession()` has a new branch for `kind === 'standalone'` that:
+- [x] `spawnSession()` has a new branch for `kind === 'standalone'` that:
   - Resolves the parent root key the same way as `'subagent'`
   - POSTs to `/api/sessions/spawn-subagent` with `silent: true`
   - Refreshes session list and switches focus to the new session
-- [ ] Existing `'root'` and `'subagent'` flows are byte-identical.
-- [ ] No new HTTP endpoint introduced — reuses existing one.
+- [x] Existing `'root'` and `'subagent'` flows are byte-identical.
+- [x] No new HTTP endpoint introduced — reuses existing one.
 
 ## Technical Notes
 
@@ -45,9 +45,10 @@ await ctx.spawnSession({ kind: 'standalone', task: 'hello, standalone' });
 
 ## Subtasks
 
-- [ ] Update type in `SpawnSessionOpts`
-- [ ] Add `'standalone'` branch in `spawnSession()`
+- [x] Update type in `SpawnSessionOpts`
+- [x] Add `'standalone'` branch in `spawnSession()`
 
 ## Log
 
 - 2026-04-25: Created.
+- 2026-04-25: Implemented. Used a body-builder ternary inside the existing fetch block rather than a full code-duplicate branch — keeps diff tight and makes the distinction clear.

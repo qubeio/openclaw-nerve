@@ -30,7 +30,7 @@ const SESSIONS_SPAWNED_LIMIT = 500;
 export type SubagentCleanupMode = 'keep' | 'delete';
 
 export interface SpawnSessionOpts {
-  kind: 'root' | 'subagent';
+  kind: 'root' | 'subagent' | 'standalone';
   task: string;
   model?: string;
   thinking?: string;
@@ -904,17 +904,29 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       throw new Error('Create a top-level agent before launching a subagent');
     }
 
+    // Build the request body. Standalone sessions reuse the same endpoint but
+    // set silent:true so no completion report is injected into the parent root.
+    // cleanup is intentionally omitted for standalone (silent + delete is unsupported).
+    const spawnBody = opts.kind === 'standalone'
+      ? {
+          parentSessionKey,
+          task: opts.task,
+          label: opts.label,
+          silent: true,
+        }
+      : {
+          parentSessionKey,
+          task: opts.task,
+          label: opts.label,
+          model: opts.model,
+          thinking: opts.thinking,
+          cleanup: opts.cleanup ?? 'keep',
+        };
+
     const res = await fetch('/api/sessions/spawn-subagent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        parentSessionKey,
-        task: opts.task,
-        label: opts.label,
-        model: opts.model,
-        thinking: opts.thinking,
-        cleanup: opts.cleanup ?? 'keep',
-      }),
+      body: JSON.stringify(spawnBody),
     });
 
     const data = await res.json() as { ok: boolean; sessionKey?: string; error?: string };
