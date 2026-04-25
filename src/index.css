@@ -35,7 +35,7 @@
       radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, transparent 30%),
       radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--color-info) 7%, transparent) 0%, transparent 28%),
       linear-gradient(180deg, color-mix(in srgb, var(--color-secondary) 20%, transparent), transparent 30%);
-    background-attachment: fixed;
+    /* background-attachment: fixed; -- disabled: prevents GPU background layer caching */
   }
   body,
   button,
@@ -206,15 +206,10 @@
 
 /* Send button pulse animation */
 @keyframes send-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 50%, transparent);
-  }
-  70% {
-    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-primary) 0%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
-  }
+  /* perf: replaced box-shadow spread animation with opacity (compositor-only, no repaint) */
+  0% { opacity: 1; }
+  70% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
 .animate-send-pulse {
@@ -338,7 +333,7 @@
   box-shadow:
     0 24px 58px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.035);
-  backdrop-filter: blur(18px);
+  /* backdrop-filter: blur(18px); -- disabled: GPU cost during streaming */
 }
 
 .shell-chip {
@@ -358,7 +353,7 @@
     color 0.15s ease,
     transform 0.15s ease,
     box-shadow 0.15s ease;
-  backdrop-filter: blur(12px);
+  /* backdrop-filter: blur(12px); -- disabled: GPU cost during streaming */
 }
 
 .shell-chip:hover {
@@ -401,7 +396,7 @@
     color 0.15s ease,
     transform 0.15s ease,
     box-shadow 0.15s ease;
-  backdrop-filter: blur(12px);
+  /* backdrop-filter: blur(12px); -- disabled: GPU cost during streaming */
 }
 
 .shell-icon-button:hover {
@@ -477,7 +472,7 @@
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(18px);
+  /* backdrop-filter: blur(18px); -- disabled: GPU cost during streaming */
 }
 
 .cockpit-row {
@@ -752,7 +747,7 @@
   box-shadow:
     0 34px 90px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(22px);
+  /* backdrop-filter: blur(22px); -- disabled: GPU cost during streaming */
   overflow: hidden;
 }
 
@@ -956,7 +951,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(12px);
+  /* backdrop-filter: blur(12px); -- disabled: GPU cost during streaming */
 }
 .code-block-actions .code-action-btn:hover {
   color: var(--color-primary);
@@ -1285,7 +1280,7 @@
 .markdown-content h3 { @apply text-sm; }
 
 .markdown-document {
-  backdrop-filter: blur(14px);
+  /* backdrop-filter: blur(14px); -- disabled: GPU cost during streaming */
 }
 
 .markdown-document-content {
@@ -1421,9 +1416,10 @@
 
 /* Activity indicator animations */
 @keyframes heartbeat-pulse {
-  0% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
-  70% { box-shadow: 0 0 0 6px transparent; opacity: 0.7; }
-  100% { box-shadow: 0 0 0 0 transparent; opacity: 0.4; }
+  /* perf: replaced box-shadow spread animation with opacity (compositor-only, no repaint) */
+  0% { opacity: 1; }
+  70% { opacity: 0.5; }
+  100% { opacity: 0.3; }
 }
 
 @keyframes activity-fade-in {
@@ -1442,8 +1438,9 @@
 
 /* Unread session indicator */
 @keyframes unread-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--color-green); }
-  50% { opacity: 0.5; box-shadow: 0 0 8px var(--color-green); }
+  /* perf: removed box-shadow animation (forces repaint); opacity-only is compositor-composited */
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .unread-dot {
