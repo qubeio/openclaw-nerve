@@ -912,6 +912,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           parentSessionKey,
           task: opts.task,
           label: opts.label,
+          model: opts.model,
           silent: true,
         }
       : {
